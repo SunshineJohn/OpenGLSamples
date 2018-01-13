@@ -1,0 +1,6 @@
+*.db
+*.idb
+*.tlog
+*.lastbuildstate
+[Dd]ebug
+[Rr]elease
