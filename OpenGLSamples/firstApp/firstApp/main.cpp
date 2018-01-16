@@ -6,7 +6,7 @@
 static const GLchar* vertex_shader_source = GLSL
 (
   450 core,
-  layout (location = 0) in vec4 offset;
+  //layout (location = 0) in vec4 offset;
 
   void main()
   {
@@ -14,7 +14,7 @@ static const GLchar* vertex_shader_source = GLSL
                                      vec4(-0.25, -0.25, 0.5, 1.0),
                                      vec4(0.25, 0.25, 0.5, 1.0));
 
-    gl_Position = vertices[gl_VertexID] + offset;
+    gl_Position = vertices[gl_VertexID]; //+ offset;
   }
 );
 
@@ -63,7 +63,24 @@ static const GLchar* tess_evaluation_source = GLSL
   }
 );
 
+static const GLchar* geometry_shader_source = GLSL
+(
+  450 core,
 
+  layout (triangles) in;
+  layout(points, max_vertices = 3) out;
+
+  void main(void)
+  {
+    int i = 0;
+
+    for (i; i < gl_in.length(); ++i)
+    {
+      gl_Position = gl_in[i].gl_Position;
+      EmitVertex();
+    }
+  }
+);
 
 class my_application : public sb7::application
 {
@@ -92,11 +109,13 @@ public:
     
     glUseProgram(rendering_program);
 
-    GLfloat attrib[] = { (float)sin(current_time)*0.5f,
+   /* GLfloat attrib[] = { (float)sin(current_time)*0.5f,
                          (float)cos(current_time)*0.5f,
                           0.0f, 0.0f };
 
-    glVertexAttrib4fv(0, attrib);
+    glVertexAttrib4fv(0, attrib);*/
+
+    glPointSize(5.0f);
     
     glDrawArrays(GL_PATCHES, 0, 3);
 	}
@@ -107,15 +126,12 @@ public:
     GLuint fragment_shader;
     GLuint control_shader;
     GLuint evaluation_shader;
+    GLuint geometry_shader;
     GLuint program;
 
     vertex_shader = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(vertex_shader, 1, &vertex_shader_source, nullptr);
     glCompileShader(vertex_shader);
-
-    fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragment_shader, 1, &fragment_shader_source, nullptr);
-    glCompileShader(fragment_shader);
 
     control_shader = glCreateShader(GL_TESS_CONTROL_SHADER);
     glShaderSource(control_shader, 1, &tess_control_source, nullptr);
@@ -125,16 +141,26 @@ public:
     glShaderSource(evaluation_shader, 1, &tess_evaluation_source, nullptr);
     glCompileShader(evaluation_shader);
 
+    geometry_shader = glCreateShader(GL_GEOMETRY_SHADER);
+    glShaderSource(geometry_shader, 1, &geometry_shader_source, nullptr);
+    glCompileShader(geometry_shader);
+
+    fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(fragment_shader, 1, &fragment_shader_source, nullptr);
+    glCompileShader(fragment_shader);
+
     program = glCreateProgram();
     glAttachShader(program, vertex_shader);
     glAttachShader(program, control_shader);
     glAttachShader(program, evaluation_shader);
+    glAttachShader(program, geometry_shader);
     glAttachShader(program, fragment_shader);
     glLinkProgram(program);
 
     glDeleteShader(vertex_shader);
     glDeleteShader(control_shader);
     glDeleteShader(evaluation_shader);
+    glDeleteShader(geometry_shader);
     glDeleteShader(fragment_shader);
 
     return program;
