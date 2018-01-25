@@ -1,4 +1,5 @@
 #include "sb7.h"
+#include "vmath.h"
 
 #define GLSL(version, shader) "#version " #version "\n" #shader                
 
@@ -6,23 +7,16 @@
 static const GLchar* vertex_shader_source = GLSL
 (
   450 core,
-  layout (location = 0) in vec4 offset;
+  layout (location = 0) in vec4 position;
+  layout (location = 1) in vec4 color;
 
   out vec4 vs_color;
 
   void main()
   {
-    const vec4 vertices[3] = vec4[3](vec4(0.25, -0.25, 0.5, 1.0),
-                                     vec4(-0.25, -0.25, 0.5, 1.0),
-                                     vec4(0.25, 0.25, 0.5, 1.0));
+    gl_Position = position/*vertices[gl_VertexID] + offset*/;
 
-    const vec4 colors[3] = vec4[3](vec4(1.0f, 0.0f, 0.0f, 1.0f),
-                                   vec4(0.0f, 1.0f, 0.0f, 1.0f),
-                                   vec4(0.0f, 0.0f, 1.0f, 1.0f));
-
-    gl_Position = vertices[gl_VertexID] + offset;
-
-    vs_color = colors[gl_VertexID];
+    vs_color = color;
   }
 );
 
@@ -35,10 +29,7 @@ static const GLchar* fragment_shader_source = GLSL
   out vec4 color;
   void main()
   {
-    color = vs_color;/*vec4(sin(gl_FragCoord.x * 0.25) * 0.5 + 0.5,
-                 cos(gl_FragCoord.y * 0.25) * 0.5 + 0.5,
-                 sin(gl_FragCoord.x * 0.15) * cos(gl_FragCoord.y * 0.15),
-                 1.0f);*/
+    color = vs_color;
   }
 );
 
@@ -113,15 +104,42 @@ public:
   void startup() override
   {
     rendering_program = compile_shaders();
-    glGenVertexArrays(1, &vertex_array_object);
-    glBindVertexArray(vertex_array_object);
+    glCreateVertexArrays(1, &vao);
+    glBindVertexArray(vao);
+    
+    static const float data[] = { 0.25, -0.25, 0.5, 1.0,
+                                  -0.25, -0.25, 0.5, 1.0,
+                                  0.25, 0.25, 0.5, 1.0 };
+
+    glCreateBuffers(2, &buffers[0]);
+    glNamedBufferStorage(buffers[0], sizeof(data), data, 0);
+
+    glVertexArrayVertexBuffer(vao, 0, buffers[0], 0, sizeof(vmath::vec4));
+    glVertexArrayAttribFormat(vao, 0, 4, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(vao, 0, 0);
+
+    glEnableVertexArrayAttrib(vao, 0);
+
+    // glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(data), data);
+
+    static const float color_data[] = { 1.0f, 0.0f, 0.0f, 1.0f,
+                                        0.0f, 1.0f, 0.0f, 1.0f,
+                                        0.0f, 0.0f, 1.0f, 1.0f };
+
+    glNamedBufferStorage(buffers[1], sizeof(color_data), color_data, 0);
+    glVertexArrayVertexBuffer(vao, 1, buffers[1], 0, sizeof(vmath::vec4));
+    glVertexArrayAttribFormat(vao, 1, 4, GL_FLOAT, GL_FALSE, 0);
+    glVertexArrayAttribBinding(vao, 1, 1);
+    glEnableVertexAttribArray(1);
 
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
   }
 
   void shutdown() override
   {
-    glDeleteVertexArrays(1, &vertex_array_object);
+    glDisableVertexAttribArray(0);
+    glDisableVertexAttribArray(1);
+    glDeleteVertexArrays(1, &vao);
     glDeleteProgram(rendering_program);
   }
 
@@ -134,11 +152,11 @@ public:
     
     glUseProgram(rendering_program);
 
-    GLfloat attrib[] = { (float)sin(current_time)*0.5f,
+    /*GLfloat attrib[] = { (float)sin(current_time)*0.5f,
                          (float)cos(current_time)*0.5f,
                           0.0f, 0.0f };
 
-    glVertexAttrib4fv(0, attrib);
+    glVertexAttrib4fv(0, attrib);*/
 
     //glPointSize(5.0f);
     
@@ -193,7 +211,8 @@ public:
 
 private:
   GLuint rendering_program;
-  GLuint vertex_array_object;
+  GLuint vao;
+  GLuint buffers[2];
 };
 
 DECLARE_MAIN(my_application);
