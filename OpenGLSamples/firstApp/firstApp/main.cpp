@@ -3,6 +3,19 @@
 
 #define GLSL(version, shader) "#version " #version "\n" #shader                
 
+struct Vertex
+{
+  float x;
+  float y;
+  float z;
+  float w;
+
+  float r;
+  float g;
+  float b;
+  float a;
+};
+
 
 static const GLchar* vertex_shader_source = GLSL
 (
@@ -108,15 +121,14 @@ public:
     glBindVertexArray(vao);
     
     static const float data[] = { 0.25, -0.25, 0.5, 1.0,
-                                  -0.25, -0.25, 0.5, 1.0,
-                                  0.25, 0.25, 0.5, 1.0 };
+                                   -0.25, -0.25, 0.5, 1.0,
+                                   0.25, 0.25, 0.5, 1.0 };
 
     glCreateBuffers(2, &buffers[0]);
     glNamedBufferStorage(buffers[0], sizeof(data), data, 0);
 
     glVertexArrayVertexBuffer(vao, 0, buffers[0], 0, sizeof(vmath::vec4));
     glVertexArrayAttribFormat(vao, 0, 4, GL_FLOAT, GL_FALSE, 0);
-    glVertexArrayAttribBinding(vao, 0, 0);
 
     glEnableVertexArrayAttrib(vao, 0);
 
@@ -129,8 +141,7 @@ public:
     glNamedBufferStorage(buffers[1], sizeof(color_data), color_data, 0);
     glVertexArrayVertexBuffer(vao, 1, buffers[1], 0, sizeof(vmath::vec4));
     glVertexArrayAttribFormat(vao, 1, 4, GL_FLOAT, GL_FALSE, 0);
-    glVertexArrayAttribBinding(vao, 1, 1);
-    glEnableVertexAttribArray(1);
+    glEnableVertexArrayAttrib(vao, 1);
 
     //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
   }
