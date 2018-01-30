@@ -6,7 +6,7 @@
 static const GLchar* vertex_shader_source = GLSL
 (
   450 core,
-  int vec4 position;
+  in vec4 position;
 
   out VS_OUT
   {
@@ -42,8 +42,32 @@ static const GLchar* fragment_shader_source = GLSL
 class SpinningCube : public sb7::application
 {
 public:
+  void LoadShaders()
+  {
+    GLuint vertex_shader;
+    GLuint fragment_shader;
+
+    vertex_shader = glCreateShader(GL_VERTEX_SHADER);
+    glShaderSource(vertex_shader, 1, &vertex_shader_source, nullptr);
+    glCompileShader(vertex_shader);
+
+    fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(fragment_shader, 1, &fragment_shader_source, nullptr);
+    glCompileShader(fragment_shader);
+
+    program = glCreateProgram();
+    glAttachShader(program, vertex_shader);
+    glAttachShader(program, fragment_shader);
+    glLinkProgram(program);
+
+    glDeleteShader(vertex_shader);
+    glDeleteShader(fragment_shader);
+  }
+  
   virtual void startup() override
   {
+    LoadShaders();
+
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
 
