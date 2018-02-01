@@ -6,7 +6,7 @@
 static const GLchar* vertex_shader_source = GLSL
 (
   450 core,
-  //in vec4 position;
+  in vec4 position;
 
   //using shader storage block
   //struct vertex
@@ -20,17 +20,17 @@ static const GLchar* vertex_shader_source = GLSL
   //  vertex vertices[];
   //}
 
-  //out VS_OUT
-  //{
-  //  vec3 color;
-  //} vs_out;
+  out VS_OUT
+  {
+    vec4 color;
+  } vs_out;
 
   uniform mat4 mv_matrix;
   uniform mat4 proj_matrix;
 
   void main(void)
   {
-    gl_Position = proj_matrix * mv_matrix * position//vertices[gl_VertexID].position;
+    gl_Position = proj_matrix * mv_matrix * position;//vertices[gl_VertexID].position;
     vs_out.color = position * 2.0 + vec4(0.5, 0.5, 0.5, 0.0);//vertices[gl_VertexID].color;
   }
 );
@@ -56,7 +56,6 @@ class SpinningCube : public sb7::application
 public:
   void LoadShaders()
   {
-
     program = glCreateProgram();
     
     GLuint vertex_shader = glCreateShader(GL_VERTEX_SHADER);
