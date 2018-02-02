@@ -1,5 +1,6 @@
 #include "sb7.h"
 #include "vmath.h"
+#include "sb7ktx.h"
 
 #include <string>
 
@@ -44,7 +45,6 @@ static const GLchar* fragment_shader_source = GLSL
   void main(void)
   {
     color = texture(s, gl_FragCoord.xy / textureSize(s, 0));
-
   }
 );
 
@@ -57,13 +57,13 @@ public:
 
     glBindTexture(GL_TEXTURE_2D, texture);
 
-    glTexStorage2D(GL_TEXTURE_2D, 8, GL_RGBA32F, 256, 256);
+    glTextureStorage2D(texture, 8, GL_RGBA32F, 256, 256);
 
     float *data = new float[256 * 256 * 4];
 
     generate_texture(data, 256, 256);
 
-    glTextureSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 256, 256, 
+    glTextureSubImage2D(texture, 0, 0, 0, 256, 256, 
                         GL_RGBA, GL_FLOAT, data);
 
     delete[] data;
@@ -72,6 +72,8 @@ public:
 
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
+
+    sb7::ktx::file::load();
   }
 
   virtual void shutdown() override
@@ -117,9 +119,9 @@ private:
   {
     int x, y;
 
-    for (y = 0; y < height; y++)
+    for (y = 0; y < height; ++y)
     {
-      for (x = 0; x < width; x++)
+      for (x = 0; x < width; ++x)
       {
         data[(y * width + x) * 4 + 0] = (float)((x & y) & 0xFF) / 255.0f;
         data[(y * width + x) * 4 + 1] = (float)((x | y) & 0xFF) / 255.0f;
@@ -128,6 +130,7 @@ private:
       }
     }
   }
+
 public:
   GLuint vao;
   GLuint texture;
