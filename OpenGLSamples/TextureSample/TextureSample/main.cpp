@@ -27,12 +27,18 @@ static void print_shader_log(GLuint shader)
 static const GLchar* vertex_shader_source = GLSL
 (
   450 core,
+
+  uniform uint triNum;
+
   void main(void)
   {
-    const vec4 vertices[] = vec4[](vec4(0.75, -0.75, 0.5, 1.0),
-                                   vec4(-0.75, -0.75, 0.5, 1.0),
-                                   vec4(0.75, 0.75, 0.5, 1.0));
-    gl_Position = vertices[gl_VertexID];
+    const vec4 vertices[] = vec4[](vec4(1, -1, 0.5, 1.0),
+                                   vec4(-1, -1, 0.5, 1.0),
+                                   vec4(1, 1, 0.5, 1.0),
+                                   vec4(-1, 1, 0.5, 1.0),
+                                   vec4(1, 1, 0.5, 1.0),
+                                   vec4(-1, -1, 0.5, 1.0));
+    gl_Position = vertices[3*triNum + gl_VertexID];
   }
 );
 
@@ -53,6 +59,9 @@ class SampleTexture : public sb7::application
 public:
   virtual void startup(void) override
   {
+    info.windowWidth = 256;
+    info.windowHeight = 256;
+
     glGenTextures(1, &texture);
 
     glBindTexture(GL_TEXTURE_2D, texture);
@@ -73,7 +82,7 @@ public:
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
 
-    sb7::ktx::file::load();
+    //sb7::ktx::file::load();
   }
 
   virtual void shutdown() override
@@ -90,7 +99,18 @@ public:
     glClearBufferfv(GL_COLOR, 0, green);
 
     glUseProgram(program);
-    glDrawArrays(GL_TRIANGLES, 0, 3);
+
+    for (size_t i=0; i<2 ;++i) 
+    {
+      GLint unifLoc = glGetUniformLocation(program, "triNum");
+
+      if (unifLoc != -1)
+      {
+        glUniform1ui(unifLoc, i);
+      }
+
+      glDrawArrays(GL_TRIANGLES, 0, 3);
+    }
   }
 
   void CompileShaders()
