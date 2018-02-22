@@ -81,7 +81,7 @@ public:
   }
 
 protected:
-  virtual void startup() override
+  virtual void startup()
   {
 #define B 0x00,0x00,0x00,0x00
 #define W 0xFF,0xFF,0xFF,0xFF
@@ -109,11 +109,11 @@ protected:
 
     glGenTextures(1, &texture_object[0]);
     glBindTexture(GL_TEXTURE_2D, texture_object[0]);
-    glTextureStorage2D(GL_TEXTURE_2D, 1, GL_RGB8, 16, 16);
-    glTextureSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 16, 16, GL_RGBA, 
-                        GL_UNSIGNED_BYTE, tex_data);
-    glTextureParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTextureParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexStorage2D(GL_TEXTURE_2D, 1, GL_RGB8, 16, 16);
+    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 16, 16, GL_RGBA, 
+                    GL_UNSIGNED_BYTE, tex_data);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
     texture_object[1] = sb7::ktx::file::load("../../../media/textures/pattern1.ktx");
 
@@ -125,13 +125,13 @@ protected:
     glDepthFunc(GL_LEQUAL);
   }
 
-  virtual void shutdown() override
+  virtual void shutdown()
   {
     glDeleteProgram(render_program);
     glDeleteTextures(2, texture_object);
   }
 
-  virtual void render(double current_time) override
+  virtual void render(double current_time)
   {
     static const GLfloat gray[] = { 0.2f, 0.2f, 0.2f, 1.0f };
     static const GLfloat ones[] = { 1.0f };
@@ -169,7 +169,14 @@ protected:
     GLuint vertex_shader = 0;
     GLuint fragment_shader = 0;
 
-    vertex_shader = glCreateShader(GL_VERTEX_SHADER);
+    vertex_shader = 
+        sb7::shader::load("../../../media/shaders/simpletexcoords/render.vs.glsl", 
+                          GL_VERTEX_SHADER);
+    fragment_shader = 
+        sb7::shader::load("../../../media/shaders/simpletexcoords/render.fs.glsl", 
+                          GL_FRAGMENT_SHADER);
+
+    /*vertex_shader = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(vertex_shader, 1, &vertex_shader_source, nullptr);
     glCompileShader(vertex_shader);
 
@@ -179,7 +186,7 @@ protected:
     glShaderSource(fragment_shader, 1, &fragment_shader_source, nullptr);
     glCompileShader(fragment_shader);
 
-    print_shader_log(fragment_shader);
+    print_shader_log(fragment_shader);*/
 
     render_program = glCreateProgram();
 
@@ -192,7 +199,7 @@ protected:
     glDeleteShader(fragment_shader);
 
     uniforms.mv_matrix = glGetUniformLocation(render_program, "mv_matrix");
-    uniforms.proj_matrix = glGetUniformLocation(render_program, "prog_matrix");
+    uniforms.proj_matrix = glGetUniformLocation(render_program, "proj_matrix");
   }
 
   virtual void onKey(int key, int action)
