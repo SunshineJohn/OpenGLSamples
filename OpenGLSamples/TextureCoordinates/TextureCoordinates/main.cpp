@@ -169,14 +169,14 @@ protected:
     GLuint vertex_shader = 0;
     GLuint fragment_shader = 0;
 
-    vertex_shader = 
-        sb7::shader::load("../../../media/shaders/simpletexcoords/render.vs.glsl", 
-                          GL_VERTEX_SHADER);
-    fragment_shader = 
-        sb7::shader::load("../../../media/shaders/simpletexcoords/render.fs.glsl", 
-                          GL_FRAGMENT_SHADER);
+    //vertex_shader = 
+    //    sb7::shader::load("../../../media/shaders/simpletexcoords/render.vs.glsl", 
+    //                      GL_VERTEX_SHADER);
+    //fragment_shader = 
+    //    sb7::shader::load("../../../media/shaders/simpletexcoords/render.fs.glsl", 
+    //                      GL_FRAGMENT_SHADER);
 
-    /*vertex_shader = glCreateShader(GL_VERTEX_SHADER);
+    vertex_shader = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(vertex_shader, 1, &vertex_shader_source, nullptr);
     glCompileShader(vertex_shader);
 
@@ -186,7 +186,7 @@ protected:
     glShaderSource(fragment_shader, 1, &fragment_shader_source, nullptr);
     glCompileShader(fragment_shader);
 
-    print_shader_log(fragment_shader);*/
+    print_shader_log(fragment_shader);
 
     render_program = glCreateProgram();
 
