@@ -44,7 +44,7 @@ static const GLchar* vertex_shader_source = GLSL
 
     vs_out.tc = (position[gl_VertexID].xy + vec2(offset, 0.5)) * vec2(30.0, 1.0);
 
-    gl_Position = mvp * vec4(position[gl_VertexID], 0, 0, 1.0);
+    gl_Position = mvp * vec4(position[gl_VertexID], 0.0, 1.0);
   }
 );
 
@@ -74,7 +74,7 @@ public:
     load_shaders();
 
     uniforms.mvp = glGetUniformLocation(render_prog, "mvp");
-    uniforms.oofset = glGetUniformLocation(render_prog, "offset");
+    uniforms.offset = glGetUniformLocation(render_prog, "offset");
 
     glGenVertexArrays(1, &render_vao);
     glBindVertexArray(render_vao);
@@ -110,11 +110,11 @@ public:
                                   (float)info.windowHeight, 
                            0.1f, 1000.0f);
 
-    glUniform1f(uniforms.oofset, t*0.03f);
+    glUniform1f(uniforms.offset, t*0.03f);
 
-    GLuint textures[] = { tex_wall, tex_floor, tex_ceiling };
+    GLuint textures[] = { tex_wall, tex_floor, tex_wall, tex_ceiling };
 
-    for (int i = 0; i < 3; ++i)
+    for (int i = 0; i < 4; ++i)
     {
       vmath::mat4 mv_matrix = vmath::rotate(90.0f*(float)i, 
                                             vmath::vec3(0.0f, 0.0f, 1.0f)) *
@@ -164,7 +164,7 @@ protected:
   struct
   {
     GLuint mvp;
-    GLuint oofset;
+    GLuint offset;
   } uniforms;
 
   GLuint tex_wall;
