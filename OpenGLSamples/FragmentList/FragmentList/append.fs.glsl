@@ -2,7 +2,7 @@
 
 layout (binding = 0, offset = 0) uniform atomic_uint fill_counter;
 
-layout (binding = 0, r32ui) coherent uimage2D head_pointer;
+layout (binding = 0, r32ui) coherent uniform uimage2D head_pointer;
 
 struct list_item
 {
@@ -28,7 +28,7 @@ void main(void)
 	ivec2 P = ivec2(gl_FragCoord.xy);
 
 	uint index = atomicCounterIncrement(fill_counter);
-	uint old_head = imageAtomicExchange(heap_pointer, P, index);
+	uint old_head = imageAtomicExchange(head_pointer, P, index);
 
 	item[index].color = fs_in.color;
 	item[index].depth = gl_FragCoord.z;

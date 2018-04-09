@@ -1,4 +1,4 @@
-#version 430 core
+#version 450 core
 
 // 2D image to store head pointers
 layout (binding = 0, r32ui) coherent uniform uimage2D head_pointer;

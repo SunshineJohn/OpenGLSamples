@@ -5,6 +5,8 @@
 #include <sb7ktx.h>
 #include <shader.h>
 
+#include <string>
+
 class FragmentList : public sb7::application
 {
 public:
@@ -56,6 +58,8 @@ void FragmentList::startup()
 {
   load_shaders();
 
+  uniforms.mvp = glGetUniformLocation(append_program, "mvp");
+
   glGenBuffers(1, &uniforms_buffer);
   glBindBuffer(GL_UNIFORM_BUFFER, uniforms_buffer);
   glBufferData(GL_UNIFORM_BUFFER, sizeof(uniforms_block), 
@@ -66,6 +70,10 @@ void FragmentList::startup()
   glGenBuffers(1, &fragment_buffer);
   glBindBuffer(GL_SHADER_STORAGE_BUFFER, fragment_buffer);
   glBufferData(GL_SHADER_STORAGE_BUFFER, 1024 * 1024 * 16, nullptr, GL_DYNAMIC_COPY);
+
+  glGenBuffers(1, &atomic_counter_buffer);
+  glBindBuffer(GL_ATOMIC_COUNTER_BUFFER, atomic_counter_buffer);
+  glBufferData(GL_ATOMIC_COUNTER_BUFFER, 4, nullptr, GL_DYNAMIC_COPY);
 
   glGenTextures(1, &head_pointer_image);
   glBindTexture(GL_TEXTURE_2D, head_pointer_image);
@@ -122,7 +130,9 @@ void FragmentList::render(double current_time)
   glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT | 
                   GL_ATOMIC_COUNTER_BARRIER_BIT | 
                   GL_SHADER_STORAGE_BARRIER_BIT);
+
   object.render();
+  
   glMemoryBarrier(GL_SHADER_IMAGE_ACCESS_BARRIER_BIT | 
                   GL_ATOMIC_COUNTER_BARRIER_BIT | 
                   GL_SHADER_STORAGE_BARRIER_BIT);
@@ -135,6 +145,140 @@ void FragmentList::render(double current_time)
                   GL_SHADER_STORAGE_BARRIER_BIT);
 
   glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+}
+
+GLuint LoadShader(std::string const &filename, GLuint shader_type)
+{
+  GLuint result_shader;
+
+  FILE* fp;
+  size_t filesize;
+  char* data;
+
+  fp = fopen(filename.data(), "rb");
+
+  if (!fp)
+  {
+    return 0;
+  }
+
+  fseek(fp, 0, SEEK_END);
+  filesize = ftell(fp);
+  fseek(fp, 0, SEEK_SET);
+
+  data = new char[filesize + 1];
+
+  if (!data)
+  {
+    return 0;
+  }
+
+  fread(data, 1, filesize, fp);
+  data[filesize] = 0;
+  fclose(fp);
+
+  result_shader = glCreateShader(shader_type);
+
+  glShaderSource(result_shader, 1, &data, nullptr);
+  delete[] data;
+  glCompileShader(result_shader);
+
+  char buffer[4096];
+  glGetShaderInfoLog(result_shader, 4096, nullptr, buffer);
+
+  OutputDebugStringA(filename.data());
+  OutputDebugStringA(":");
+  OutputDebugStringA(buffer);
+  OutputDebugStringA("\n");
+
+  return result_shader;
+}
+
+void FragmentList::load_shaders()
+{
+  char buffer[4096];
+  GLuint shaders[2];
+
+  shaders[0] = LoadShader("clear.vs.glsl", GL_VERTEX_SHADER);
+  shaders[1] = LoadShader("clear.fs.glsl", GL_FRAGMENT_SHADER);
+
+  if (clear_program)
+  {
+    glDeleteProgram(clear_program);
+  }
+
+  clear_program = glCreateProgram();
+
+  for (int i = 0; i < 2; ++i)
+  {
+    glAttachShader(clear_program, shaders[i]);
+  }
+
+  glLinkProgram(clear_program);
+
+  glGetProgramInfoLog(clear_program, 4096, nullptr, buffer);
+
+  OutputDebugStringA(buffer);
+  OutputDebugStringA("\n");
+
+
+  shaders[0] = LoadShader("append.vs.glsl", GL_VERTEX_SHADER);
+  shaders[1] = LoadShader("append.fs.glsl", GL_FRAGMENT_SHADER);
+
+  if (append_program)
+  {
+    glDeleteProgram(append_program);
+  }
+
+  append_program = glCreateProgram();
+
+  for (int i = 0; i < 2; ++i)
+  {
+    glAttachShader(append_program, shaders[i]);
+  }
+
+  glLinkProgram(append_program);
+
+  glGetProgramInfoLog(append_program, 4096, nullptr, buffer);
+
+  OutputDebugStringA(buffer);
+  OutputDebugStringA("\n");
+
+
+  shaders[0] = LoadShader("resolve.vs.glsl", GL_VERTEX_SHADER);
+  shaders[1] = LoadShader("resolve.fs.glsl", GL_FRAGMENT_SHADER);
+
+  if (resolve_program)
+  {
+    glDeleteProgram(resolve_program);
+  }
+
+  resolve_program = glCreateProgram();
+
+  for (int i = 0; i < 2; ++i)
+  {
+    glAttachShader(resolve_program, shaders[i]);
+  }
+
+  glLinkProgram(resolve_program);
+
+  glGetProgramInfoLog(resolve_program, 4096, nullptr, buffer);
+
+  OutputDebugStringA(buffer);
+  OutputDebugStringA("\n");
+}
+
+void FragmentList::onKey(int key, int action)
+{
+  if (action)
+  {
+    switch (key)
+    {
+    case 'R':
+      load_shaders();
+      break;
+    }
+  }
 }
 
 DECLARE_MAIN(FragmentList)

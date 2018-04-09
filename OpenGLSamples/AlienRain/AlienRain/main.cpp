@@ -11,7 +11,7 @@ static const GLchar* vertex_shader_source = GLSL
 
   out VS_OUT
   {
-    float int alien;
+    flat int alien;
     vec2 tc;
   } vs_out;
 
@@ -36,7 +36,7 @@ static const GLchar* vertex_shader_source = GLSL
                                      vec2( 0.5,  0.5));
 
     vs_out.tc = position[gl_VertexID].xy + vec2(0.5);
-    float so = cos(droplet[alien_index].orientation);
+    float co = cos(droplet[alien_index].orientation);
     float si = sin(droplet[alien_index].orientation);
 
     mat2 rot = mat2(vec2(co, si),
@@ -59,7 +59,7 @@ static const GLchar* fragment_shader_source = GLSL
     vec2 tc;
   } fs_in;
 
-  uniform sampler2DArray tex_aliens;
+  layout (binding = 0) uniform sampler2DArray tex_aliens;
 
   void main(void)
   {
@@ -171,9 +171,9 @@ public:
     glAttachShader(render_prog, vertex_shader);
     glAttachShader(render_prog, fragment_shader);
 
-    glLinkProgram(render_prog);
-
     glGetProgramInfoLog(render_prog, 1024, nullptr, buffer);
+
+    glLinkProgram(render_prog);
 
     glDeleteShader(vertex_shader);
     glDeleteShader(fragment_shader);
