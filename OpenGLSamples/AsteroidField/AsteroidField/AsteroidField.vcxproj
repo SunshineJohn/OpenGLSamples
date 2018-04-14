@@ -20,8 +20,8 @@
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
-    <ProjectGuid>{1028FA13-F5B0-496A-84B9-B5D5F6D7FF5D}</ProjectGuid>
-    <RootNamespace>InstancedAttributes</RootNamespace>
+    <ProjectGuid>{4BF4E557-B397-4CE8-ACA0-28F4E4C96E6A}</ProjectGuid>
+    <RootNamespace>AsteroidField</RootNamespace>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
