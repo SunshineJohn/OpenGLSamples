@@ -69,10 +69,10 @@ void AsteroidField::startup()
                NUM_DRAWS * sizeof(DrawArraysIndirectCommand),
                nullptr, GL_STATIC_DRAW);
 
-  DrawArraysIndirectCommand *cmd = 
-      (DrawArraysIndirectCommand*)glMapBufferRange(GL_DRAW_INDIRECT_BUFFER, 0,
-                                                   NUM_DRAWS * sizeof(DrawArraysIndirectCommand), 
-                                                   GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
+  DrawArraysIndirectCommand *cmd = (DrawArraysIndirectCommand*)
+      glMapBufferRange(GL_DRAW_INDIRECT_BUFFER, 0,
+                       NUM_DRAWS * sizeof(DrawArraysIndirectCommand), 
+                       GL_MAP_WRITE_BIT | GL_MAP_INVALIDATE_BUFFER_BIT);
 
   for (int i = 0; i < NUM_DRAWS; ++i) 
   {
@@ -173,8 +173,8 @@ void AsteroidField::LoadShaders()
 {
   GLuint shaders[2];
 
-  shaders[1] = sb7::shader::load("Asteroid.vs.glsl", GL_VERTEX_SHADER);
-  shaders[2] = sb7::shader::load("Asteroid.fs.glsl", GL_FRAGMENT_SHADER);
+  shaders[0] = sb7::shader::load("Asteroid.vs.glsl", GL_VERTEX_SHADER);
+  shaders[1] = sb7::shader::load("Asteroid.fs.glsl", GL_FRAGMENT_SHADER);
 
   if (render_program)
   {
