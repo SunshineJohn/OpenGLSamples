@@ -127,6 +127,12 @@
   <ItemGroup>
     <ClCompile Include="main.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="render.fs.glsl" />
+    <None Include="render.vs.glsl" />
+    <None Include="update.fs.glsl" />
+    <None Include="update.vs.glsl" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
